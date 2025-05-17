@@ -5,8 +5,12 @@ import ClientLayout from './ClientLayout';
 export const metadata = {
   title: 'MyMovieList',
   description: 'A movie listing website',
-  viewport: 'width=device-width, initial-scale=1',
   charset: 'utf-8',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }) {
