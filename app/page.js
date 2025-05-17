@@ -1,3 +1,5 @@
+'use client';
+
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
@@ -30,10 +32,10 @@ export const viewport = {
   initialScale: 1,
 };
 
-export default function Home() {
+export default function Home({ searchParams }) {
   return (
     <Suspense fallback={<LoadingFallback />}>
-      <ClientPage />
+      <ClientPage initialSearchParams={searchParams} />
     </Suspense>
   );
 }

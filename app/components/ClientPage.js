@@ -24,7 +24,7 @@ const HomeContent = dynamic(() => import('./HomeContent'), {
   ssr: false
 });
 
-export default function ClientPage() {
+export default function ClientPage({ initialSearchParams }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function ClientPage() {
 
   return (
     <Suspense fallback={<LoadingFallback />}>
-      <HomeContent />
+      <HomeContent initialSearchParams={initialSearchParams} />
     </Suspense>
   );
 } 

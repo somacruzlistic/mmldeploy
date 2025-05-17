@@ -7,7 +7,6 @@ import GenreFilter from './GenreFilter';
 import Footer from './Footer';
 import InfiniteMovieScroll from './InfiniteMovieScroll';
 import SearchBar from './SearchBar';
-import SearchParamsHandler from './SearchParamsHandler';
 
 function LoadingFallback() {
   return (
@@ -25,7 +24,7 @@ function LoadingFallback() {
   );
 }
 
-function MainContent({ searchParams }) {
+function MainContent({ initialSearchParams }) {
   const { data: session, status } = useSession();
   const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
   const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
@@ -43,10 +42,10 @@ function MainContent({ searchParams }) {
   });
 
   const [movieSectionState, setMovieSectionState] = useState({
-    'popular-movies': { page: 1, genre: 'all', isFetching: false, movies: [], error: null, hasMore: true },
-    'upcoming-movies': { page: 1, genre: 'all', isFetching: false, movies: [], error: null, hasMore: true },
-    'top-rated-movies': { page: 1, genre: 'all', isFetching: false, movies: [], error: null, hasMore: true },
-    'bhutanese-movies': { pageToken: '', genre: 'all', isFetching: false, searchQuery: '', movies: [], error: null, hasMore: true },
+    'popular-movies': { page: 1, genre: initialSearchParams?.genre || 'all', isFetching: false, movies: [], error: null, hasMore: true },
+    'upcoming-movies': { page: 1, genre: initialSearchParams?.genre || 'all', isFetching: false, movies: [], error: null, hasMore: true },
+    'top-rated-movies': { page: 1, genre: initialSearchParams?.genre || 'all', isFetching: false, movies: [], error: null, hasMore: true },
+    'bhutanese-movies': { pageToken: '', genre: initialSearchParams?.genre || 'all', isFetching: false, searchQuery: '', movies: [], error: null, hasMore: true },
   });
 
   const [mounted, setMounted] = useState(false);
@@ -102,14 +101,10 @@ function MainContent({ searchParams }) {
   );
 }
 
-export default function HomeContent() {
+export default function HomeContent({ initialSearchParams }) {
   return (
-    <SearchParamsHandler>
-      {(searchParams) => (
-        <Suspense fallback={<LoadingFallback />}>
-          <MainContent searchParams={searchParams} />
-        </Suspense>
-      )}
-    </SearchParamsHandler>
+    <Suspense fallback={<LoadingFallback />}>
+      <MainContent initialSearchParams={initialSearchParams} />
+    </Suspense>
   );
 } 
