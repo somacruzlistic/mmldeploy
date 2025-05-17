@@ -13,15 +13,20 @@ export default function InfiniteMovieScroll({
 }) {
   const scrollContainerRef = useRef(null);
   const scrollTimeoutRef = useRef(null);
+  const [error, setError] = useState(null);
 
   const fetchMovies = useCallback(async () => {
     const currentState = movieSectionState[sectionKey];
-    if (currentState.isFetching || !currentState.hasMore) return;
+    if (currentState.isFetching || !currentState.hasMore) {
+      console.log(`Skipping fetch for ${sectionKey} - isFetching: ${currentState.isFetching}, hasMore: ${currentState.hasMore}`);
+      return;
+    }
 
     try {
+      console.log(`Fetching ${sectionKey} movies, page: ${currentState.page}, genre: ${currentState.genre}`);
       setMovieSectionState(prev => ({
         ...prev,
-        [sectionKey]: { ...prev[sectionKey], isFetching: true }
+        [sectionKey]: { ...prev[sectionKey], isFetching: true, error: null }
       }));
 
       let url;
@@ -29,8 +34,15 @@ export default function InfiniteMovieScroll({
 
       if (sectionKey === 'bhutanese-movies') {
         url = `/api/youtube/search?pageToken=${currentState.pageToken}&genre=${currentState.genre}`;
+        console.log('Fetching from YouTube API:', url);
         const response = await fetch(url);
         data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch YouTube videos');
+        }
+
+        console.log('YouTube API response:', data);
         
         setMovieSectionState(prev => ({
           ...prev,
@@ -50,8 +62,29 @@ export default function InfiniteMovieScroll({
         };
 
         url = `/api/movies/${tmdbEndpoints[sectionKey]}?page=${currentState.page}&genre=${currentState.genre}`;
+        console.log(`Fetching from TMDB API: ${url}`);
+        
         const response = await fetch(url);
+        const contentType = response.headers.get('content-type');
+        console.log(`Response content type: ${contentType}`);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`API error response: ${errorText}`);
+          throw new Error(`Failed to fetch movies: ${response.status} ${response.statusText}`);
+        }
+
         data = await response.json();
+        console.log(`TMDB API response for ${sectionKey}:`, {
+          page: data.page,
+          total_pages: data.total_pages,
+          total_results: data.total_results,
+          results_count: data.results?.length
+        });
+
+        if (!data.results || !Array.isArray(data.results)) {
+          throw new Error('Invalid response format: missing results array');
+        }
 
         setMovieSectionState(prev => ({
           ...prev,
@@ -60,18 +93,21 @@ export default function InfiniteMovieScroll({
             movies: [...prev[sectionKey].movies, ...data.results],
             page: prev[sectionKey].page + 1,
             hasMore: data.page < data.total_pages,
-            isFetching: false
+            isFetching: false,
+            error: null
           }
         }));
       }
     } catch (error) {
       console.error(`Error fetching ${sectionKey}:`, error);
+      setError(error.message);
       setMovieSectionState(prev => ({
         ...prev,
         [sectionKey]: {
           ...prev[sectionKey],
           error: error.message,
-          isFetching: false
+          isFetching: false,
+          hasMore: false
         }
       }));
     }
@@ -98,7 +134,8 @@ export default function InfiniteMovieScroll({
 
   useEffect(() => {
     const currentState = movieSectionState[sectionKey];
-    if (currentState.movies.length === 0 && currentState.hasMore) {
+    if (currentState.movies.length === 0 && currentState.hasMore && !currentState.isFetching) {
+      console.log(`Initial fetch for ${sectionKey}`);
       fetchMovies();
     }
   }, [sectionKey, movieSectionState, fetchMovies]);
@@ -117,6 +154,14 @@ export default function InfiniteMovieScroll({
   }, [handleScroll]);
 
   const currentState = movieSectionState[sectionKey];
+
+  if (error) {
+    return (
+      <div className="text-red-500 p-4 bg-red-100/10 rounded-lg">
+        Error: {error}
+      </div>
+    );
+  }
 
   return (
     <div

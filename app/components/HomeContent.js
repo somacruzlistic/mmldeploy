@@ -31,6 +31,7 @@ export default function HomeContent({ searchParams }) {
   const [mounted, setMounted] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [error, setError] = useState(null);
 
   const [userMovieLists, setUserMovieLists] = useState({
     Watching: [],
@@ -52,19 +53,30 @@ export default function HomeContent({ searchParams }) {
   });
 
   useEffect(() => {
+    console.log('HomeContent mounted, session status:', status);
     setMounted(true);
     if (session) {
       fetchUserLists();
     }
   }, [session]);
 
+  useEffect(() => {
+    console.log('Current movieSectionState:', movieSectionState);
+  }, [movieSectionState]);
+
   const fetchUserLists = async () => {
     try {
+      console.log('Fetching user lists...');
       const response = await fetch('/api/user/lists');
+      if (!response.ok) {
+        throw new Error('Failed to fetch user lists');
+      }
       const data = await response.json();
+      console.log('User lists fetched:', data);
       setUserMovieLists(data);
     } catch (error) {
       console.error('Error fetching user lists:', error);
+      setError(error.message);
     }
   };
 
@@ -214,6 +226,13 @@ export default function HomeContent({ searchParams }) {
 
       {/* Footer */}
       <Footer />
+
+      {/* Error Notification */}
+      {error && (
+        <div className="fixed top-16 left-0 right-0 z-50 bg-red-500/90 text-white p-4 text-center">
+          Error: {error}
+        </div>
+      )}
     </div>
   );
 } 
