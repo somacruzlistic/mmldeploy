@@ -1,9 +1,19 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-export default function SearchParamsHandler({ children }) {
+function SearchParamsContent({ children }) {
   const searchParams = useSearchParams();
-  
-  return children({ searchParams });
+  return children(searchParams);
+}
+
+export default function SearchParamsHandler({ children }) {
+  return (
+    <Suspense fallback={null}>
+      <SearchParamsContent>
+        {(searchParams) => children(searchParams)}
+      </SearchParamsContent>
+    </Suspense>
+  );
 } 

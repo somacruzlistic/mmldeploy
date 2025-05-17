@@ -104,12 +104,12 @@ function MainContent({ searchParams }) {
 
 export default function HomeContent() {
   return (
-    <Suspense fallback={<LoadingFallback />}>
-      <SearchParamsHandler>
-        {({ searchParams }) => (
+    <SearchParamsHandler>
+      {(searchParams) => (
+        <Suspense fallback={<LoadingFallback />}>
           <MainContent searchParams={searchParams} />
-        )}
-      </SearchParamsHandler>
-    </Suspense>
+        </Suspense>
+      )}
+    </SearchParamsHandler>
   );
 } 

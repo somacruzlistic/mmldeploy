@@ -1,5 +1,9 @@
 import { Suspense } from 'react';
-import ClientPage from './components/ClientPage';
+import dynamic from 'next/dynamic';
+
+const ClientPage = dynamic(() => import('./components/ClientPage'), {
+  ssr: false,
+});
 
 function LoadingFallback() {
   return (
@@ -19,6 +23,12 @@ function LoadingFallback() {
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+// Add viewport configuration
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
 
 export default function Home() {
   return (
