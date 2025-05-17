@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import MovieCard from './MovieCard';
 import GenreFilter from './GenreFilter';
 import Footer from './Footer';
@@ -25,9 +26,11 @@ function LoadingFallback() {
 }
 
 export default function HomeContent({ searchParams }) {
+  const router = useRouter();
   const { data: session, status } = useSession();
-  const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-  const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
+  const [mounted, setMounted] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   const [userMovieLists, setUserMovieLists] = useState({
     Watching: [],
@@ -48,8 +51,6 @@ export default function HomeContent({ searchParams }) {
     'bhutanese-movies': { pageToken: '', genre: searchParams?.genre || 'all', isFetching: false, searchQuery: '', movies: [], error: null, hasMore: true },
   });
 
-  const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
     setMounted(true);
     if (session) {
@@ -67,6 +68,28 @@ export default function HomeContent({ searchParams }) {
     }
   };
 
+  const handleSearch = async (query) => {
+    setIsSearching(true);
+    try {
+      const response = await fetch(`/api/movies/search?query=${encodeURIComponent(query)}`);
+      const data = await response.json();
+      setSearchResults(data.results);
+    } catch (error) {
+      console.error('Error searching movies:', error);
+    }
+    setIsSearching(false);
+  };
+
+  const handleGenreChange = (genre) => {
+    const params = new URLSearchParams(searchParams);
+    if (genre === 'all') {
+      params.delete('genre');
+    } else {
+      params.set('genre', genre);
+    }
+    router.push(`/?${params.toString()}`);
+  };
+
   if (!mounted || status === 'loading') {
     return <LoadingFallback />;
   }
@@ -82,7 +105,9 @@ export default function HomeContent({ searchParams }) {
                 MyMovieList
               </h1>
               <div className="flex items-center gap-4">
-                <SearchBar />
+                <div className="w-64">
+                  <SearchBar onSearch={handleSearch} />
+                </div>
                 {session ? (
                   <button
                     onClick={() => signOut()}
@@ -105,8 +130,34 @@ export default function HomeContent({ searchParams }) {
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
-          <GenreFilter currentGenre={searchParams?.genre || 'all'} />
+          <GenreFilter 
+            selectedGenre={searchParams?.genre || 'all'} 
+            onGenreChange={handleGenreChange}
+          />
           
+          {/* Search Results */}
+          {isSearching ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+            </div>
+          ) : searchResults.length > 0 ? (
+            <section className="mb-12">
+              <h2 className="text-2xl font-bold mb-6">Search Results</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {searchResults.map((movie) => (
+                  <MovieCard
+                    key={movie.id}
+                    movie={movie}
+                    userMovieLists={userMovieLists}
+                    setUserMovieLists={setUserMovieLists}
+                    session={session}
+                    source="tmdb"
+                  />
+                ))}
+              </div>
+            </section>
+          ) : null}
+
           {/* Popular Movies */}
           <section className="mb-12">
             <h2 className="text-2xl font-bold mb-6">Popular Movies</h2>
