@@ -1,40 +1,60 @@
+import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-export async function POST(req) {
-  const { username, password } = await req.json();
+export async function POST(request) {
+  try {
+    const { username, email, password, name } = await request.json();
 
-  if (!username || !password) {
-    return Response.json({ error: 'Username and password are required' }, { status: 400 });
+    // Validate input
+    if (!username || !email || !password) {
+      return NextResponse.json(
+        { error: 'Username, email, and password are required' },
+        { status: 400 }
+      );
+    }
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email },
+          { username }
+        ]
+      }
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: 'User with this email or username already exists' },
+        { status: 400 }
+      );
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
+    const user = await prisma.user.create({
+      data: {
+        username,
+        email,
+        password: hashedPassword,
+        name: name || username,
+      }
+    });
+
+    // Remove password from response
+    const { password: _, ...userWithoutPassword } = user;
+
+    return NextResponse.json(userWithoutPassword);
+  } catch (error) {
+    console.error('Error in signup:', error);
+    return NextResponse.json(
+      { error: 'Something went wrong during signup' },
+      { status: 500 }
+    );
   }
-
-  // Check if username is already taken
-  const existing = await prisma.user.findUnique({ where: { username } });
-  if (existing) {
-    return Response.json({ error: 'Username is already taken' }, { status: 400 });
-  }
-
-  // Validate username format (alphanumeric and underscores only)
-  const usernameRegex = /^[a-zA-Z0-9_]+$/;
-  if (!usernameRegex.test(username)) {
-    return Response.json({ error: 'Username can only contain letters, numbers, and underscores' }, { status: 400 });
-  }
-
-  // Validate username length
-  if (username.length < 3 || username.length > 20) {
-    return Response.json({ error: 'Username must be between 3 and 20 characters' }, { status: 400 });
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await prisma.user.create({
-    data: { 
-      username,
-      password: hashedPassword,
-      email: `${username}@placeholder.com` // We still need an email for Google auth compatibility
-    },
-  });
-
-  return Response.json({ message: 'User created', userId: user.id });
 }
