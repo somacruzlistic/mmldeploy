@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
-import { useSearchParams } from 'next/navigation';
 import MovieCard from './MovieCard';
 import GenreFilter from './GenreFilter';
 import Footer from './Footer';
 import InfiniteMovieScroll from './InfiniteMovieScroll';
 import SearchBar from './SearchBar';
+import SearchParamsHandler from './SearchParamsHandler';
 
 function LoadingFallback() {
   return (
@@ -25,11 +25,10 @@ function LoadingFallback() {
   );
 }
 
-function MainContent() {
+function MainContent({ searchParams }) {
   const { data: session, status } = useSession();
   const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
   const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
-  const searchParams = useSearchParams();
 
   const [userMovieLists, setUserMovieLists] = useState({
     Watching: [],
@@ -106,7 +105,11 @@ function MainContent() {
 export default function HomeContent() {
   return (
     <Suspense fallback={<LoadingFallback />}>
-      <MainContent />
+      <SearchParamsHandler>
+        {({ searchParams }) => (
+          <MainContent searchParams={searchParams} />
+        )}
+      </SearchParamsHandler>
     </Suspense>
   );
 } 

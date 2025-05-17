@@ -3,11 +3,6 @@
 import { useState, useEffect, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
-const HomeContent = dynamic(() => import('./HomeContent'), {
-  ssr: false,
-  loading: () => <LoadingFallback />,
-});
-
 function LoadingFallback() {
   return (
     <div className="min-h-screen bg-black">
@@ -23,6 +18,11 @@ function LoadingFallback() {
     </div>
   );
 }
+
+const HomeContent = dynamic(() => import('./HomeContent'), {
+  loading: () => <LoadingFallback />,
+  ssr: false
+});
 
 export default function ClientPage() {
   const [mounted, setMounted] = useState(false);
