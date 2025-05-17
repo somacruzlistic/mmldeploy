@@ -5,10 +5,19 @@ const nextConfig = {
     domains: ['image.tmdb.org', 'i.ytimg.com'],
   },
   experimental: {
-    // This will make the build process more lenient with client components
-    appDir: true,
-    serverActions: true,
+    serverActions: {
+      bodySizeLimit: '2mb'
+    }
   },
+  // Move serverComponentsExternalPackages to root level as per warning
+  serverExternalPackages: ['@prisma/client'],
+  webpack: (config) => {
+    config.externals = [...config.externals, 'prisma', 'postinstall'];
+    return config;
+  },
+  // Disable static optimization
+  staticPageGenerationTimeout: 1000,
+  output: 'standalone',
 };
 
 export default nextConfig;
