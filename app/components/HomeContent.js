@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import MovieCard from './MovieCard';
 import GenreFilter from './GenreFilter';
@@ -24,7 +24,7 @@ function LoadingFallback() {
   );
 }
 
-function MainContent({ initialSearchParams }) {
+export default function HomeContent({ searchParams }) {
   const { data: session, status } = useSession();
   const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
   const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
@@ -42,10 +42,10 @@ function MainContent({ initialSearchParams }) {
   });
 
   const [movieSectionState, setMovieSectionState] = useState({
-    'popular-movies': { page: 1, genre: initialSearchParams?.genre || 'all', isFetching: false, movies: [], error: null, hasMore: true },
-    'upcoming-movies': { page: 1, genre: initialSearchParams?.genre || 'all', isFetching: false, movies: [], error: null, hasMore: true },
-    'top-rated-movies': { page: 1, genre: initialSearchParams?.genre || 'all', isFetching: false, movies: [], error: null, hasMore: true },
-    'bhutanese-movies': { pageToken: '', genre: initialSearchParams?.genre || 'all', isFetching: false, searchQuery: '', movies: [], error: null, hasMore: true },
+    'popular-movies': { page: 1, genre: searchParams?.genre || 'all', isFetching: false, movies: [], error: null, hasMore: true },
+    'upcoming-movies': { page: 1, genre: searchParams?.genre || 'all', isFetching: false, movies: [], error: null, hasMore: true },
+    'top-rated-movies': { page: 1, genre: searchParams?.genre || 'all', isFetching: false, movies: [], error: null, hasMore: true },
+    'bhutanese-movies': { pageToken: '', genre: searchParams?.genre || 'all', isFetching: false, searchQuery: '', movies: [], error: null, hasMore: true },
   });
 
   const [mounted, setMounted] = useState(false);
@@ -98,13 +98,5 @@ function MainContent({ initialSearchParams }) {
       {/* Footer */}
       <Footer />
     </div>
-  );
-}
-
-export default function HomeContent({ initialSearchParams }) {
-  return (
-    <Suspense fallback={<LoadingFallback />}>
-      <MainContent initialSearchParams={initialSearchParams} />
-    </Suspense>
   );
 } 

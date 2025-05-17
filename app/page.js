@@ -1,10 +1,9 @@
-'use client';
-
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
 const ClientPage = dynamic(() => import('./components/ClientPage'), {
   ssr: false,
+  loading: () => <LoadingFallback />
 });
 
 function LoadingFallback() {
@@ -32,10 +31,10 @@ export const viewport = {
   initialScale: 1,
 };
 
-export default function Home({ searchParams }) {
+export default async function Home({ searchParams }) {
   return (
-    <Suspense fallback={<LoadingFallback />}>
-      <ClientPage initialSearchParams={searchParams} />
-    </Suspense>
+    <div suppressHydrationWarning>
+      <ClientPage searchParams={searchParams} />
+    </div>
   );
 }
