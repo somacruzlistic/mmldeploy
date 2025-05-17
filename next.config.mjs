@@ -4,24 +4,19 @@ const nextConfig = {
   images: {
     domains: ['image.tmdb.org', 'i.ytimg.com'],
   },
-  experimental: {
-    serverActions: {
-      bodySizeLimit: '2mb'
-    }
-  },
-  // Move serverComponentsExternalPackages to root level as per warning
-  serverExternalPackages: ['@prisma/client'],
-  webpack: (config) => {
-    config.externals = [...config.externals, 'prisma', 'postinstall'];
-    return config;
-  },
-  // Disable static optimization
-  staticPageGenerationTimeout: 1000,
-  output: 'standalone',
-  // Add ESLint configuration
+  // Production optimizations
+  swcMinify: true,
+  poweredByHeader: false,
+  // Disable ESLint during build
   eslint: {
-    ignoreDuringBuilds: true, // Temporarily ignore ESLint errors during build
+    ignoreDuringBuilds: true,
   },
+  // Enable app directory features
+  experimental: {
+    appDir: true,
+  },
+  // Output configuration
+  output: 'standalone',
 };
 
 export default nextConfig;

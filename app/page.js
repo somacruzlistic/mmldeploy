@@ -2,7 +2,6 @@ import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
 const ClientPage = dynamic(() => import('./components/ClientPage'), {
-  ssr: false,
   loading: () => <LoadingFallback />
 });
 
@@ -22,19 +21,19 @@ function LoadingFallback() {
   );
 }
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
-// Add viewport configuration
-export const viewport = {
-  width: 'device-width',
-  initialScale: 1,
+export const metadata = {
+  title: 'MyMovieList',
+  description: 'A movie listing website',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+  },
 };
 
-export default async function Home({ searchParams }) {
+export default function Home({ searchParams }) {
   return (
-    <div suppressHydrationWarning>
+    <Suspense fallback={<LoadingFallback />}>
       <ClientPage searchParams={searchParams} />
-    </div>
+    </Suspense>
   );
 }

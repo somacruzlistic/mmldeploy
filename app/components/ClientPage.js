@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
 function LoadingFallback() {
@@ -20,8 +20,7 @@ function LoadingFallback() {
 }
 
 const HomeContent = dynamic(() => import('./HomeContent'), {
-  loading: () => <LoadingFallback />,
-  ssr: false
+  loading: () => <LoadingFallback />
 });
 
 export default function ClientPage({ searchParams }) {
@@ -35,9 +34,5 @@ export default function ClientPage({ searchParams }) {
     return <LoadingFallback />;
   }
 
-  return (
-    <div suppressHydrationWarning>
-      <HomeContent searchParams={searchParams} />
-    </div>
-  );
+  return <HomeContent searchParams={searchParams} />;
 } 
