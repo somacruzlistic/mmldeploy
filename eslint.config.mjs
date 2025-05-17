@@ -20,7 +20,16 @@ const eslintConfig = [
     },
     rules: {
       '@next/next/no-html-link-for-pages': 'error',
-      '@next/next/no-img-element': 'error'
+      '@next/next/no-img-element': 'error',
+      '@next/next/no-sync-scripts': 'error',
+      '@next/next/no-script-component-in-head': 'error',
+      '@next/next/google-font-display': 'error',
+      '@next/next/no-page-custom-font': 'error'
+    },
+    settings: {
+      next: {
+        rootDir: '.'
+      }
     }
   }
 ];
