@@ -21,7 +21,26 @@ export default function HomeContent() {
     'Already Watched': [],
   });
 
-  if (status === 'loading') {
+  const [userListsState, setUserListsState] = useState({
+    Watching: { isFetching: false, error: null },
+    'Will Watch': { isFetching: false, error: null },
+    'Already Watched': { isFetching: false, error: null },
+  });
+
+  const [movieSectionState, setMovieSectionState] = useState({
+    'popular-movies': { page: 1, genre: 'all', isFetching: false, movies: [], error: null, hasMore: true },
+    'upcoming-movies': { page: 1, genre: 'all', isFetching: false, movies: [], error: null, hasMore: true },
+    'top-rated-movies': { page: 1, genre: 'all', isFetching: false, movies: [], error: null, hasMore: true },
+    'bhutanese-movies': { pageToken: '', genre: 'all', isFetching: false, searchQuery: '', movies: [], error: null, hasMore: true },
+  });
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || status === 'loading') {
     return (
       <div className="min-h-screen bg-black">
         <div className="animate-pulse">
@@ -39,7 +58,43 @@ export default function HomeContent() {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
-      {/* ... Copy the entire JSX from the original HomeContent ... */}
+      <main className="flex-1">
+        {/* Header */}
+        <header className="fixed top-0 left-0 right-0 z-50 bg-gray-900/80 backdrop-blur-xl border-b border-white/5">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                MyMovieList
+              </h1>
+              <div className="flex items-center gap-4">
+                {session ? (
+                  <button
+                    onClick={() => signOut()}
+                    className="px-4 py-2 text-sm font-medium text-white/70 hover:text-white transition-colors duration-200"
+                  >
+                    Sign Out
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => signIn()}
+                    className="px-4 py-2 text-sm font-medium text-white/70 hover:text-white transition-colors duration-200"
+                  >
+                    Sign In
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+          {/* Add your main content sections here */}
+        </div>
+      </main>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 } 

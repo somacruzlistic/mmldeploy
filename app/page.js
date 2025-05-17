@@ -1,9 +1,7 @@
 'use client';
 
-import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
-// Use dynamic import for the main content to avoid SSR issues
 const HomeContent = dynamic(() => import('./components/HomeContent'), {
   ssr: false,
   loading: () => (
@@ -22,9 +20,5 @@ const HomeContent = dynamic(() => import('./components/HomeContent'), {
 });
 
 export default function Home() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <HomeContent />
-    </Suspense>
-  );
+  return <HomeContent />;
 }
