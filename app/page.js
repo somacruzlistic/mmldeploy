@@ -30,6 +30,9 @@ export const metadata = {
   },
 };
 
+// Enable static generation with dynamic params
+export const dynamicParams = true;
+
 export default function Home({ searchParams }) {
   return (
     <Suspense fallback={<LoadingFallback />}>

@@ -52,7 +52,20 @@ export default function HomeContent({ searchParams }) {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (session) {
+      fetchUserLists();
+    }
+  }, [session]);
+
+  const fetchUserLists = async () => {
+    try {
+      const response = await fetch('/api/user/lists');
+      const data = await response.json();
+      setUserMovieLists(data);
+    } catch (error) {
+      console.error('Error fetching user lists:', error);
+    }
+  };
 
   if (!mounted || status === 'loading') {
     return <LoadingFallback />;
@@ -69,6 +82,7 @@ export default function HomeContent({ searchParams }) {
                 MyMovieList
               </h1>
               <div className="flex items-center gap-4">
+                <SearchBar />
                 {session ? (
                   <button
                     onClick={() => signOut()}
@@ -91,7 +105,59 @@ export default function HomeContent({ searchParams }) {
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
-          {/* Add your main content sections here */}
+          <GenreFilter currentGenre={searchParams?.genre || 'all'} />
+          
+          {/* Popular Movies */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-6">Popular Movies</h2>
+            <InfiniteMovieScroll
+              sectionKey="popular-movies"
+              movieSectionState={movieSectionState}
+              setMovieSectionState={setMovieSectionState}
+              userMovieLists={userMovieLists}
+              setUserMovieLists={setUserMovieLists}
+              session={session}
+            />
+          </section>
+
+          {/* Upcoming Movies */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-6">Upcoming Movies</h2>
+            <InfiniteMovieScroll
+              sectionKey="upcoming-movies"
+              movieSectionState={movieSectionState}
+              setMovieSectionState={setMovieSectionState}
+              userMovieLists={userMovieLists}
+              setUserMovieLists={setUserMovieLists}
+              session={session}
+            />
+          </section>
+
+          {/* Top Rated Movies */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-6">Top Rated Movies</h2>
+            <InfiniteMovieScroll
+              sectionKey="top-rated-movies"
+              movieSectionState={movieSectionState}
+              setMovieSectionState={setMovieSectionState}
+              userMovieLists={userMovieLists}
+              setUserMovieLists={setUserMovieLists}
+              session={session}
+            />
+          </section>
+
+          {/* Bhutanese Movies */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-6">Bhutanese Movies</h2>
+            <InfiniteMovieScroll
+              sectionKey="bhutanese-movies"
+              movieSectionState={movieSectionState}
+              setMovieSectionState={setMovieSectionState}
+              userMovieLists={userMovieLists}
+              setUserMovieLists={setUserMovieLists}
+              session={session}
+            />
+          </section>
         </div>
       </main>
 

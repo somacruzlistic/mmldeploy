@@ -19,7 +19,7 @@ export default function ClientLayout({ children }) {
   }
 
   return (
-    <SessionProvider>
+    <SessionProvider refetchInterval={0}>
       {children}
     </SessionProvider>
   );
