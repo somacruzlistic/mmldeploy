@@ -1,5 +1,4 @@
 import './globals.css';
-import Link from 'next/link';
 import ClientLayout from './ClientLayout';
 
 export const metadata = {
@@ -15,7 +14,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body className="bg-dark-bg text-light-text font-sans overflow-x-hidden">
         <ClientLayout>{children}</ClientLayout>
       </body>
